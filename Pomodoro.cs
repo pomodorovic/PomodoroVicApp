@@ -2,11 +2,15 @@
 using System.Configuration;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Windows.Forms.Design;
 
 namespace PomodoroVicApp
 {
 	public partial class Pomodoro : Form
 	{
+		private TrackBarMenuItem trackBarTiempoInicio;
+		private TrackBarMenuItem trackBarTiempoBreak;
+
 		private System.DateTime dtmTiempoAuxiliar;
 		private System.DateTime dtmTiempoActualizado;
 		private int valorInicialPomodoro, valorBreakPomodoro, valorPomodoroEnEjecucion;
@@ -28,12 +32,51 @@ namespace PomodoroVicApp
 
 		private void Pomodoro_Load(object sender, EventArgs e)
 		{
+
+			// 
+			// trackBarTiempoInicio
+			// 
+			this.trackBarTiempoInicio = new TrackBarMenuItem();
+			this.trackBarTiempoInicio.Name = "toolStripTrackBarTiempoInicio";
+			this.trackBarTiempoInicio.Maximum = 60;
+			this.trackBarTiempoInicio.Minimum = 5;
+			this.trackBarTiempoInicio.Size = new System.Drawing.Size(185, 69);
+			this.trackBarTiempoInicio.SmallChange = 5;
+			this.trackBarTiempoInicio.TickFrequency = 5;
+			this.trackBarTiempoInicio.Value = 5;
+			this.trackBarTiempoInicio.ValueChanged += new System.EventHandler(this.trackBarTiempoInicio_Scroll);
+
+			// 
+			// trackBarTiempoBreak
+			// 
+			this.trackBarTiempoBreak = new TrackBarMenuItem();
+			this.trackBarTiempoBreak.Name = "toolStripTrackBarTiempoInicio";
+			this.trackBarTiempoBreak.Maximum = 60;
+			this.trackBarTiempoBreak.Minimum = 5;
+			this.trackBarTiempoBreak.Size = new System.Drawing.Size(185, 69);
+			this.trackBarTiempoBreak.SmallChange = 5;
+			this.trackBarTiempoBreak.TickFrequency = 5;
+			this.trackBarTiempoBreak.Value = 5;
+			this.trackBarTiempoBreak.ValueChanged += new System.EventHandler(this.trackBarTiempoBreak_Scroll);
+			// 
+			// menuItemMinutosInicio
+			// 
+			this.menuItemMinutosInicio.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { this.trackBarTiempoInicio });
+			this.menuItemMinutosBreak.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { this.trackBarTiempoBreak });
+
+
+
+
+
+
 			lblTiempo.Text = "00:00";
 			lblStatus.Text = "Doble clic para iniciar";
 			valorInicialPomodoro = Convert.ToInt32(ConfigurationManager.AppSettings["valorInicialPomodoro"]);
 			valorBreakPomodoro = Convert.ToInt32(ConfigurationManager.AppSettings["valorBreakPomodoro"]);
 			menuItemMinutosInicio.Text = valorInicialPomodoro + " minutos de inicio";
 			menuItemMinutosBreak.Text = valorBreakPomodoro + " minutos de descanso";
+			trackBarTiempoInicio.Value = valorInicialPomodoro;
+			//toolStripTextBoxTiempoBreak.Text = valorBreakPomodoro.ToString();
 
 
 			this.Opacity = 1 - Convert.ToDouble(ConfigurationManager.AppSettings["opacidad"]);
@@ -230,12 +273,18 @@ namespace PomodoroVicApp
 
 		private void Pomodoro_KeyDown(object sender, KeyEventArgs e)
 		{
-			/*if (e.KeyCode == Keys.Escape)
+			if (e.KeyCode == Keys.Space)
 			{
-				menuItemCancelar_Click(null, null);
+				menuItemPausarContinuarPomodoro_Click(null, null);
 				// prevent child controls from handling this event as well
 				e.SuppressKeyPress = true;
-			}*/
+			}
+			else if (e.KeyCode == Keys.Escape)
+			{
+				menuItemCancelar_Click(null,null);
+				// prevent child controls from handling this event as well
+				e.SuppressKeyPress = true;
+			}
 		}
 
 		private void menuItemTransp0_Click(object sender, EventArgs e)
@@ -297,7 +346,6 @@ namespace PomodoroVicApp
 			if( ! ntfPomodoro.Visible)
 			{
 				ntfPomodoro.Visible = true;
-				//this.ntfPomodoro.Text = "Doble clic para maximizar...";
 				this.Hide();
 			}
 			else
@@ -317,6 +365,17 @@ namespace PomodoroVicApp
 		private void ntfPomodoro_MouseMove(object sender, MouseEventArgs e)
 		{
 			this.ntfPomodoro.Text = lblTiempo.Text;
+		}
+
+		private void trackBarTiempoInicio_Scroll(object sender, EventArgs e)
+		{
+			valorInicialPomodoro = Convert.ToInt32(trackBarTiempoInicio.Value);
+			menuItemMinutosInicio.Text = valorInicialPomodoro + " minutos de inicio";
+		}
+		private void trackBarTiempoBreak_Scroll(object sender, EventArgs e)
+		{
+			valorBreakPomodoro = Convert.ToInt32(trackBarTiempoBreak.Value);
+			menuItemMinutosBreak.Text = valorBreakPomodoro + " minutos de descanso";
 		}
 
 		private void ProcesarVentana(object sender, System.Windows.Forms.MouseEventArgs e)
@@ -356,5 +415,59 @@ namespace PomodoroVicApp
 			this.Left = rightmost.WorkingArea.Right - this.Width;
 			this.Top = rightmost.WorkingArea.Bottom - this.Height;
 		}
+	}
+	[ToolStripItemDesignerAvailability(ToolStripItemDesignerAvailability.MenuStrip |
+								   ToolStripItemDesignerAvailability.ContextMenuStrip)]
+	public class TrackBarMenuItem : ToolStripControlHost
+	{
+		private TrackBar trackBar;
+
+		public TrackBarMenuItem() : base(new TrackBar())
+		{
+			this.trackBar = this.Control as TrackBar;
+		}
+
+		// Add properties, events etc. you want to expose...
+		public int Maximum { get => trackBar.Maximum; set => trackBar.Maximum = value; }
+		public int Minimum { get => trackBar.Minimum; set => trackBar.Minimum = value; }
+		public int SmallChange { get => trackBar.SmallChange; set => trackBar.SmallChange = value; }
+		public int TickFrequency { get => trackBar.TickFrequency; set => trackBar.TickFrequency = value; }
+		public int Value { get => trackBar.Value; set => trackBar.Value = value; }
+		/// <summary>
+		/// Attach to events we want to re-wrap
+		/// </summary>
+		/// <param name="control"></param>
+		protected override void OnSubscribeControlEvents(Control control)
+		{
+			base.OnSubscribeControlEvents(control);
+			TrackBar trackBar = control as TrackBar;
+			trackBar.ValueChanged += new EventHandler(trackBar_ValueChanged);
+		}
+		/// <summary>
+		/// Detach from events.
+		/// </summary>
+		/// <param name="control"></param>
+		protected override void OnUnsubscribeControlEvents(Control control)
+		{
+			base.OnUnsubscribeControlEvents(control);
+			TrackBar trackBar = control as TrackBar;
+			trackBar.ValueChanged -= new EventHandler(trackBar_ValueChanged);
+		}
+		/// <summary>
+		/// Routing for event
+		/// TrackBar.ValueChanged -> ToolStripTrackBar.ValueChanged
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		void trackBar_ValueChanged(object sender, EventArgs e)
+		{
+			// when the trackbar value changes, fire an event.
+			if (this.ValueChanged != null)
+			{
+				ValueChanged(sender, e);
+			}
+		}
+		// add an event that is subscribable from the designer.
+		public event EventHandler ValueChanged;
 	}
 }

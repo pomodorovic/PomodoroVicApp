@@ -53,6 +53,8 @@
 			this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
 			this.menuItemAcercaDe = new System.Windows.Forms.ToolStripMenuItem();
 			this.menuItemSalir = new System.Windows.Forms.ToolStripMenuItem();
+			this.menuItemConfigurarTiempo = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripTextBox1 = new System.Windows.Forms.ToolStripTextBox();
 			this.ntfPomodoro = new System.Windows.Forms.NotifyIcon(this.components);
 			this.ctmMenu.SuspendLayout();
 			this.SuspendLayout();
@@ -98,9 +100,10 @@
             this.configuraciónToolStripMenuItem,
             this.toolStripMenuItem3,
             this.menuItemAcercaDe,
-            this.menuItemSalir});
+            this.menuItemSalir,
+            this.menuItemConfigurarTiempo});
 			this.ctmMenu.Name = "ctmMenu";
-			this.ctmMenu.Size = new System.Drawing.Size(311, 279);
+			this.ctmMenu.Size = new System.Drawing.Size(311, 278);
 			// 
 			// menuItemMinutosInicio
 			// 
@@ -154,6 +157,8 @@
 			// 
 			// menuItemAlwaysOnTop
 			// 
+			this.menuItemAlwaysOnTop.Checked = true;
+			this.menuItemAlwaysOnTop.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.menuItemAlwaysOnTop.Name = "menuItemAlwaysOnTop";
 			this.menuItemAlwaysOnTop.Size = new System.Drawing.Size(353, 34);
 			this.menuItemAlwaysOnTop.Text = "AlwaysOnTop";
@@ -168,6 +173,8 @@
 			// 
 			// menuItemBlink
 			// 
+			this.menuItemBlink.Checked = true;
+			this.menuItemBlink.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.menuItemBlink.Name = "menuItemBlink";
 			this.menuItemBlink.Size = new System.Drawing.Size(353, 34);
 			this.menuItemBlink.Text = "Blink antes de finalizar";
@@ -238,6 +245,20 @@
 			this.menuItemSalir.Text = "Salir";
 			this.menuItemSalir.Click += new System.EventHandler(this.menuItemSalir_Click);
 			// 
+			// menuItemConfigurarTiempo
+			// 
+			this.menuItemConfigurarTiempo.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripTextBox1});
+			this.menuItemConfigurarTiempo.Name = "menuItemConfigurarTiempo";
+			this.menuItemConfigurarTiempo.Size = new System.Drawing.Size(310, 32);
+			this.menuItemConfigurarTiempo.Text = "Configurar pomodoro...";
+			// 
+			// toolStripTextBox1
+			// 
+			this.toolStripTextBox1.Font = new System.Drawing.Font("Segoe UI", 9F);
+			this.toolStripTextBox1.Name = "toolStripTextBox1";
+			this.toolStripTextBox1.Size = new System.Drawing.Size(100, 31);
+			// 
 			// ntfPomodoro
 			// 
 			this.ntfPomodoro.Text = "notifyIcon1";
@@ -292,6 +313,8 @@
 		private System.Windows.Forms.ToolStripMenuItem menuItemTransp50;
 		private System.Windows.Forms.ToolStripMenuItem menuItemTransp75;
 		private System.Windows.Forms.NotifyIcon ntfPomodoro;
+		private System.Windows.Forms.ToolStripMenuItem menuItemConfigurarTiempo;
+		private System.Windows.Forms.ToolStripTextBox toolStripTextBox1;
 	}
 }
 
