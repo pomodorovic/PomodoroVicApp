@@ -12,5 +12,10 @@ Pomodoro application
 - [x] Se crea opcion Blink (seleccionado por default) para que alterne en colores si esta a 1 minuto o menos por finalizar el pomodoro.
 - [x] Se añade notificador tooltip la cual se presenta en forma de alerta no intrusiva cuando tiempo a finalizado.
 - [x] Se añade en label de hora fin, el pomodoro finalizado, con formato P: 5 o P:25
+>Versión 2.0.1:
+- [x] Se añade funcionalidad para personalizar tiempo descanso y break
+- [x] Se añade funcionalidad para pausar o cancelar por teclado un pomodoro
+
+
 
 
