@@ -15,6 +15,9 @@ Pomodoro application
 >Versión 2.0.1:
 - [x] Se añade funcionalidad para personalizar tiempo descanso y break
 - [x] Se añade funcionalidad para pausar o cancelar por teclado un pomodoro
+>Versión 2.0.2:
+- [x] Se añade funcionalidad para identificar pomodoro ideal
+- [x] Se añade funcionalidad para guardar en log estadísticas
 
 
 
