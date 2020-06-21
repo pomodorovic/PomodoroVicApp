@@ -66,9 +66,6 @@ namespace PomodoroVicApp
 			this.menuItemMinutosBreak.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { this.trackBarTiempoBreak });
 
 
-
-
-
 			pathLog = System.Environment.CurrentDirectory + "\\" + Application.ProductName + ".log";
 			valorInicialPomodoro = Convert.ToInt32(ConfigurationManager.AppSettings["valorInicialPomodoro"]);
 			valorBreakPomodoro = Convert.ToInt32(ConfigurationManager.AppSettings["valorBreakPomodoro"]);
@@ -76,16 +73,14 @@ namespace PomodoroVicApp
 			menuItemMinutosInicio.Text = valorInicialPomodoro + " minutos de inicio";
 			menuItemMinutosBreak.Text = valorBreakPomodoro + " minutos de descanso";
 			trackBarTiempoInicio.Value = valorInicialPomodoro;
-			//toolStripTextBoxTiempoBreak.Text = valorBreakPomodoro.ToString();
-
 
 			this.Opacity = 1 - Convert.ToDouble(ConfigurationManager.AppSettings["opacidad"]);
 			this.TopMost = Convert.ToBoolean(ConfigurationManager.AppSettings["TopMost"]);
 			menuItemAlwaysOnTop.Checked = this.TopMost;
 			this.menuItemAutoSwitch.Checked = Convert.ToBoolean(ConfigurationManager.AppSettings["AutoSwitch"]);
 			this.menuItemBlink.Checked = Convert.ToBoolean(ConfigurationManager.AppSettings["Blink"]); ;
-			menuItemCancelar_Click(null, null);
 			lblTiempo.Text = "00:00";
+			lblTiempo.ForeColor = System.Drawing.Color.Maroon;
 			lblStatus.Text = "Doble clic para iniciar";
 			valorPomodoroEnEjecucion = valorBreakPomodoro;
 			ntfPomodoro.Icon = this.Icon;
@@ -212,8 +207,8 @@ namespace PomodoroVicApp
 			valorPomodoroEnEjecucion = valorPomodoroAEjecutar;
 			dtmTiempoAuxiliar = new DateTime(1901, 1, 1, 1, 0, 0);
 			dtmTiempoActualizado = new DateTime(1901, 1, 1, 1, 0, 0);
-			dtmTiempoActualizado = dtmTiempoActualizado.AddSeconds(10);//o 3 segundos para desarrollo, para pruebas internas/unitarias
-			//dtmTiempoActualizado = dtmTiempoActualizado.AddMinutes(valorPomodoroAEjecutar);
+			//dtmTiempoActualizado = dtmTiempoActualizado.AddSeconds(10);//o 3 segundos para desarrollo, para pruebas internas/unitarias
+			dtmTiempoActualizado = dtmTiempoActualizado.AddMinutes(valorPomodoroAEjecutar);
 			lblStatus.Text = "P " + valorPomodoroEnEjecucion + " iniciado a : " + DateTime.Now.ToString("hh:mm:ss");
 			if (menuItemActivarLog.Checked)
 			{
@@ -327,12 +322,22 @@ namespace PomodoroVicApp
 			DialogResult result = MessageBox.Show("Seguro desea salir?", "Confirmación", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
 			if (result == DialogResult.Yes)
 			{
+				string valorPomodoroActual = (menuItemIdentificarPomodoroIdeal.Checked) ? "ideal" : valorPomodoroEnEjecucion.ToString();
+				if (menuItemActivarLog.Checked)
+				{
+					using (StreamWriter escribirArchivo = new StreamWriter(pathLog, true))
+					{
+						escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroActual + "  finalizado en " + lblTiempo.Text);
+					}
+				}
 				Application.Exit();
 			}
 		}
 
 		private void menuItemCancelar_Click(object sender, EventArgs e)
 		{
+			if (lblTiempo.Text == "00:00")
+				return;
 			timerControlTiempo.Stop();
 			string valorPomodoroActual = (menuItemIdentificarPomodoroIdeal.Checked) ? "ideal" : valorPomodoroEnEjecucion.ToString();
 			if (menuItemActivarLog.Checked)

@@ -82,7 +82,7 @@
 			this.lblStatus.AutoSize = true;
 			this.lblStatus.Location = new System.Drawing.Point(5, 85);
 			this.lblStatus.Name = "lblStatus";
-			this.lblStatus.Size = new System.Drawing.Size(49, 20);
+			this.lblStatus.Size = new System.Drawing.Size(82, 31);
 			this.lblStatus.TabIndex = 3;
 			this.lblStatus.Text = "00:00";
 			this.lblStatus.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lblStatus_MouseDown);
@@ -103,52 +103,52 @@
             this.menuItemAcercaDe,
             this.menuItemSalir});
 			this.ctmMenu.Name = "ctmMenu";
-			this.ctmMenu.Size = new System.Drawing.Size(296, 311);
+			this.ctmMenu.Size = new System.Drawing.Size(297, 311);
 			// 
 			// menuItemMinutosInicio
 			// 
 			this.menuItemMinutosInicio.Name = "menuItemMinutosInicio";
-			this.menuItemMinutosInicio.Size = new System.Drawing.Size(295, 32);
+			this.menuItemMinutosInicio.Size = new System.Drawing.Size(296, 32);
 			this.menuItemMinutosInicio.Text = "Inicio minutos";
 			this.menuItemMinutosInicio.Click += new System.EventHandler(this.menuItemMinutosInicio_Click);
 			// 
 			// menuItemMinutosBreak
 			// 
 			this.menuItemMinutosBreak.Name = "menuItemMinutosBreak";
-			this.menuItemMinutosBreak.Size = new System.Drawing.Size(295, 32);
+			this.menuItemMinutosBreak.Size = new System.Drawing.Size(296, 32);
 			this.menuItemMinutosBreak.Text = "Break minutos";
 			this.menuItemMinutosBreak.Click += new System.EventHandler(this.menuItemMinutosBreak_Click);
 			// 
 			// menuItemIdentificarPomodoroIdeal
 			// 
 			this.menuItemIdentificarPomodoroIdeal.Name = "menuItemIdentificarPomodoroIdeal";
-			this.menuItemIdentificarPomodoroIdeal.Size = new System.Drawing.Size(295, 32);
-			this.menuItemIdentificarPomodoroIdeal.Text = "Identificar Pomodoro ideal";
+			this.menuItemIdentificarPomodoroIdeal.Size = new System.Drawing.Size(296, 32);
+			this.menuItemIdentificarPomodoroIdeal.Text = "Identificar Pomodoro Ideal";
 			this.menuItemIdentificarPomodoroIdeal.Click += new System.EventHandler(this.menuItemIdentificarPomodoroIdeal_Click);
 			// 
 			// toolStripMenuItem4
 			// 
 			this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-			this.toolStripMenuItem4.Size = new System.Drawing.Size(292, 6);
+			this.toolStripMenuItem4.Size = new System.Drawing.Size(293, 6);
 			// 
 			// menuItemCancelar
 			// 
 			this.menuItemCancelar.Name = "menuItemCancelar";
-			this.menuItemCancelar.Size = new System.Drawing.Size(295, 32);
+			this.menuItemCancelar.Size = new System.Drawing.Size(296, 32);
 			this.menuItemCancelar.Text = "Finalizar Timer Pomodoro";
 			this.menuItemCancelar.Click += new System.EventHandler(this.menuItemCancelar_Click);
 			// 
 			// menuItemPausarContinuarPomodoro
 			// 
 			this.menuItemPausarContinuarPomodoro.Name = "menuItemPausarContinuarPomodoro";
-			this.menuItemPausarContinuarPomodoro.Size = new System.Drawing.Size(295, 32);
+			this.menuItemPausarContinuarPomodoro.Size = new System.Drawing.Size(296, 32);
 			this.menuItemPausarContinuarPomodoro.Text = "Pausar Pomodoro";
 			this.menuItemPausarContinuarPomodoro.Click += new System.EventHandler(this.menuItemPausarContinuarPomodoro_Click);
 			// 
 			// toolStripMenuItem2
 			// 
 			this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-			this.toolStripMenuItem2.Size = new System.Drawing.Size(292, 6);
+			this.toolStripMenuItem2.Size = new System.Drawing.Size(293, 6);
 			// 
 			// configuraciónToolStripMenuItem
 			// 
@@ -160,7 +160,7 @@
             this.opacidadToolStripMenuItem,
             this.menuItemMinimizarMostrarSystemTray});
 			this.configuraciónToolStripMenuItem.Name = "configuraciónToolStripMenuItem";
-			this.configuraciónToolStripMenuItem.Size = new System.Drawing.Size(295, 32);
+			this.configuraciónToolStripMenuItem.Size = new System.Drawing.Size(296, 32);
 			this.configuraciónToolStripMenuItem.Text = "Configuración";
 			// 
 			// menuItemAlwaysOnTop
@@ -244,19 +244,19 @@
 			// toolStripMenuItem3
 			// 
 			this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-			this.toolStripMenuItem3.Size = new System.Drawing.Size(292, 6);
+			this.toolStripMenuItem3.Size = new System.Drawing.Size(293, 6);
 			// 
 			// menuItemAcercaDe
 			// 
 			this.menuItemAcercaDe.Name = "menuItemAcercaDe";
-			this.menuItemAcercaDe.Size = new System.Drawing.Size(295, 32);
+			this.menuItemAcercaDe.Size = new System.Drawing.Size(296, 32);
 			this.menuItemAcercaDe.Text = "Acerca de ...";
 			this.menuItemAcercaDe.Click += new System.EventHandler(this.menuItemAcercaDe_Click);
 			// 
 			// menuItemSalir
 			// 
 			this.menuItemSalir.Name = "menuItemSalir";
-			this.menuItemSalir.Size = new System.Drawing.Size(295, 32);
+			this.menuItemSalir.Size = new System.Drawing.Size(296, 32);
 			this.menuItemSalir.Text = "Salir";
 			this.menuItemSalir.Click += new System.EventHandler(this.menuItemSalir_Click);
 			// 
