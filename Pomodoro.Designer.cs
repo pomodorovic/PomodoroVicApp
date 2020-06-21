@@ -64,11 +64,11 @@
 			this.lblTiempo.AutoSize = true;
 			this.lblTiempo.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.lblTiempo.ForeColor = System.Drawing.Color.SteelBlue;
-			this.lblTiempo.Location = new System.Drawing.Point(6, 0);
+			this.lblTiempo.Location = new System.Drawing.Point(0, 0);
 			this.lblTiempo.Name = "lblTiempo";
-			this.lblTiempo.Size = new System.Drawing.Size(215, 82);
+			this.lblTiempo.Size = new System.Drawing.Size(275, 82);
 			this.lblTiempo.TabIndex = 0;
-			this.lblTiempo.Text = "00:00";
+			this.lblTiempo.Text = "0:00:00";
 			this.lblTiempo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 			this.lblTiempo.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lblTiempo_MouseDown);
 			// 
@@ -103,7 +103,7 @@
             this.menuItemAcercaDe,
             this.menuItemSalir});
 			this.ctmMenu.Name = "ctmMenu";
-			this.ctmMenu.Size = new System.Drawing.Size(297, 311);
+			this.ctmMenu.Size = new System.Drawing.Size(297, 278);
 			// 
 			// menuItemMinutosInicio
 			// 
@@ -271,7 +271,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(226, 112);
+			this.ClientSize = new System.Drawing.Size(256, 112);
 			this.Controls.Add(this.lblStatus);
 			this.Controls.Add(this.lblTiempo);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;

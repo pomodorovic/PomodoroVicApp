@@ -21,6 +21,9 @@ Pomodoro application
 >Versión 2.0.3:
 - [x] Se resuelven bug, que solo contaba 10 segundos y que al iniciar programa graba en log erroneamiente.
 - [x] Se guarda log al salir
+>Versión 2.0.4:
+- [x] Se resuelven bug en opción: identificar pomodoro ideal, para que muestre horas si pasa de 60 minutos
+- [x] Se corrige espacios demás que guardaba en log.
 
 
 

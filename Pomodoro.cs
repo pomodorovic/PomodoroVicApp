@@ -164,7 +164,7 @@ namespace PomodoroVicApp
 			menuItemMinutosBreak.Checked = false;
 			menuItemIdentificarPomodoroIdeal.Checked = true;
 			lblTiempo.ForeColor = System.Drawing.Color.MediumVioletRed;
-			dtmTiempoActualizado = new DateTime(1901, 1, 1, 1, 0, 0);
+			dtmTiempoActualizado = new DateTime(2020, 1, 1, 0, 0, 0);
 			lblStatus.Text = "P ideal iniciado a : " + DateTime.Now.ToString("hh:mm:ss");
 			if (menuItemActivarLog.Checked)
 			{
@@ -205,8 +205,8 @@ namespace PomodoroVicApp
 		private void ProcesarPomodoro(int valorPomodoroAEjecutar)
 		{
 			valorPomodoroEnEjecucion = valorPomodoroAEjecutar;
-			dtmTiempoAuxiliar = new DateTime(1901, 1, 1, 1, 0, 0);
-			dtmTiempoActualizado = new DateTime(1901, 1, 1, 1, 0, 0);
+			dtmTiempoAuxiliar = new DateTime(2020, 1, 1, 0, 0, 0);
+			dtmTiempoActualizado = new DateTime(2020, 1, 1, 0, 0, 0);
 			//dtmTiempoActualizado = dtmTiempoActualizado.AddSeconds(10);//o 3 segundos para desarrollo, para pruebas internas/unitarias
 			dtmTiempoActualizado = dtmTiempoActualizado.AddMinutes(valorPomodoroAEjecutar);
 			lblStatus.Text = "P " + valorPomodoroEnEjecucion + " iniciado a : " + DateTime.Now.ToString("hh:mm:ss");
@@ -225,7 +225,26 @@ namespace PomodoroVicApp
 			if(menuItemIdentificarPomodoroIdeal.Checked )
 			{
 				dtmTiempoActualizado = dtmTiempoActualizado.Add(new TimeSpan(0, 0, 0, 1));
-				lblTiempo.Text = dtmTiempoActualizado.ToString("mm:ss");
+				if(dtmTiempoActualizado.Hour>0)
+				{
+					lblTiempo.Text = dtmTiempoActualizado.ToString("h:mm:ss");
+				}
+				else
+				{
+					lblTiempo.Text = dtmTiempoActualizado.ToString("mm:ss");
+				}
+				if (dtmTiempoActualizado.Minute >= 59 && menuItemBlink.Checked)
+				{
+					if (lblTiempo.ForeColor == System.Drawing.Color.MediumVioletRed)
+					{
+						lblTiempo.ForeColor = System.Drawing.Color.Red;
+					}
+					else
+					{
+						lblTiempo.ForeColor = System.Drawing.Color.MediumVioletRed;
+					}
+				}
+
 				return;
 			}
 			if (dtmTiempoActualizado <= dtmTiempoAuxiliar)
@@ -237,7 +256,7 @@ namespace PomodoroVicApp
 				{
 					using (StreamWriter escribirArchivo = new StreamWriter(pathLog, true))
 					{
-						escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroEnEjecucion + "  finalizado");
+						escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroEnEjecucion + " finalizado");
 					}
 				}
 
@@ -327,7 +346,7 @@ namespace PomodoroVicApp
 				{
 					using (StreamWriter escribirArchivo = new StreamWriter(pathLog, true))
 					{
-						escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroActual + "  finalizado en " + lblTiempo.Text);
+						escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroActual + " finalizado en " + lblTiempo.Text);
 					}
 				}
 				Application.Exit();
@@ -344,7 +363,7 @@ namespace PomodoroVicApp
 			{
 				using (StreamWriter escribirArchivo = new StreamWriter(pathLog, true))
 				{
-					escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroActual + "  finalizado en " + lblTiempo.Text);
+					escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroActual + " finalizado en " + lblTiempo.Text);
 				}
 			}
 			lblTiempo.Text = "00:00";
@@ -364,7 +383,7 @@ namespace PomodoroVicApp
 				{
 					using (StreamWriter escribirArchivo = new StreamWriter(pathLog, true))
 					{
-						escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroActual + "  retomado en " + lblTiempo.Text);
+						escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroActual + " retomado en " + lblTiempo.Text);
 					}
 				}
 				lblStatus.Text = "P " + valorPomodoroActual + " retomado en :" + DateTime.Now.ToString("hh:mm:ss");
@@ -379,7 +398,7 @@ namespace PomodoroVicApp
 				{
 					using (StreamWriter escribirArchivo = new StreamWriter(pathLog, true))
 					{
-						escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroActual + "  pausado en " + lblTiempo.Text);
+						escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroActual + " pausado en " + lblTiempo.Text);
 					}
 				}
 			}
