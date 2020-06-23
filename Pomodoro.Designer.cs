@@ -82,7 +82,7 @@
 			this.lblStatus.AutoSize = true;
 			this.lblStatus.Location = new System.Drawing.Point(5, 85);
 			this.lblStatus.Name = "lblStatus";
-			this.lblStatus.Size = new System.Drawing.Size(82, 31);
+			this.lblStatus.Size = new System.Drawing.Size(49, 20);
 			this.lblStatus.TabIndex = 3;
 			this.lblStatus.Text = "00:00";
 			this.lblStatus.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lblStatus_MouseDown);
@@ -279,6 +279,7 @@
 			this.Name = "Pomodoro";
 			this.ShowInTaskbar = false;
 			this.Text = "PomodoroVic";
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Pomodoro_FormClosing);
 			this.Load += new System.EventHandler(this.Pomodoro_Load);
 			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Pomodoro_KeyDown);
 			this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Pomodoro_MouseDown);

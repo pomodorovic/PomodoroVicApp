@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
+using Microsoft.Win32;
 
 namespace PomodoroVicApp
 {
@@ -59,6 +60,10 @@ namespace PomodoroVicApp
 			this.trackBarTiempoBreak.TickFrequency = 5;
 			this.trackBarTiempoBreak.Value = 5;
 			this.trackBarTiempoBreak.ValueChanged += new System.EventHandler(this.trackBarTiempoBreak_Scroll);
+
+			//Detección de bloqueo de PC
+			SystemEvents.SessionSwitch += SystemEvents_SessionSwitch;
+
 			// 
 			// menuItemMinutosInicio
 			// 
@@ -164,6 +169,7 @@ namespace PomodoroVicApp
 			menuItemMinutosBreak.Checked = false;
 			menuItemIdentificarPomodoroIdeal.Checked = true;
 			lblTiempo.ForeColor = System.Drawing.Color.MediumVioletRed;
+			//dtmTiempoActualizado = new DateTime(2020, 1, 1, 0, 59, 50);//10 segundos antes de 1 hora, para desarrollo -> pruebas unitarias
 			dtmTiempoActualizado = new DateTime(2020, 1, 1, 0, 0, 0);
 			lblStatus.Text = "P ideal iniciado a : " + DateTime.Now.ToString("hh:mm:ss");
 			if (menuItemActivarLog.Checked)
@@ -233,15 +239,22 @@ namespace PomodoroVicApp
 				{
 					lblTiempo.Text = dtmTiempoActualizado.ToString("mm:ss");
 				}
-				if (dtmTiempoActualizado.Minute >= 59 && menuItemBlink.Checked)
+				if (dtmTiempoActualizado.Minute >= 59)
 				{
-					if (lblTiempo.ForeColor == System.Drawing.Color.MediumVioletRed)
+					if (menuItemBlink.Checked)
 					{
-						lblTiempo.ForeColor = System.Drawing.Color.Red;
+						if (lblTiempo.ForeColor == System.Drawing.Color.MediumVioletRed)
+						{
+							lblTiempo.ForeColor = System.Drawing.Color.Red;
+						}
+						else
+						{
+							lblTiempo.ForeColor = System.Drawing.Color.MediumVioletRed;
+						}
 					}
-					else
+					if(dtmTiempoActualizado.Second==59)
 					{
-						lblTiempo.ForeColor = System.Drawing.Color.MediumVioletRed;
+						MostrarMensajeBalon(SystemIcons.Exclamation, ToolTipIcon.Warning, "Información", "Pomodoro tomá ya más de una hora", 3000);
 					}
 				}
 
@@ -259,13 +272,7 @@ namespace PomodoroVicApp
 						escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroEnEjecucion + " finalizado");
 					}
 				}
-
-				ntfPomodoro.Icon = SystemIcons.Exclamation;
-				ntfPomodoro.BalloonTipTitle = "Mensaje";
-				ntfPomodoro.BalloonTipText = "Fin del Pomodoro " + valorPomodoroEnEjecucion;
-				ntfPomodoro.BalloonTipIcon = ToolTipIcon.Info;
-				ntfPomodoro.Visible = true;
-				ntfPomodoro.ShowBalloonTip(30000);
+				MostrarMensajeBalon(SystemIcons.Exclamation, ToolTipIcon.Info, "Información", "Fin del Pomodoro " + valorPomodoroEnEjecucion, 3000);
 				if (menuItemAutoSwitch.Checked)
 				{
 					//Ejecuta el metodo contrario
@@ -321,6 +328,15 @@ namespace PomodoroVicApp
 					}
 				}
 			}
+		}
+		private void MostrarMensajeBalon(Icon icon, ToolTipIcon toolTipIcon, string titulo, string texto, int tiempoVisible)
+		{
+			//ntfPomodoro.Icon = icon;
+			ntfPomodoro.BalloonTipTitle = titulo;
+			ntfPomodoro.BalloonTipText = texto;
+			ntfPomodoro.BalloonTipIcon = toolTipIcon;
+			ntfPomodoro.Visible = true;
+			ntfPomodoro.ShowBalloonTip(tiempoVisible);
 		}
 
 		private void menuItemAcercaDe_Click(object sender, EventArgs e)
@@ -401,6 +417,18 @@ namespace PomodoroVicApp
 						escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroActual + " pausado en " + lblTiempo.Text);
 					}
 				}
+			}
+		}
+		public void SystemEvents_SessionSwitch(object sender, SessionSwitchEventArgs e)
+		{
+			if (e.Reason == SessionSwitchReason.SessionLock)
+			{
+				menuItemPausarContinuarPomodoro_Click(null, null);
+			}
+			if (e.Reason == SessionSwitchReason.SessionUnlock)
+			{
+				menuItemPausarContinuarPomodoro_Click(null, null);
+				MostrarMensajeBalon(SystemIcons.Exclamation, ToolTipIcon.Info, "Información", "Se reanuda pomodoro!!", 3000);
 			}
 		}
 
@@ -503,6 +531,13 @@ namespace PomodoroVicApp
 			{
 				menuItemActivarLog.Checked = true;
 			}
+		}
+
+		private void Pomodoro_FormClosing(object sender, FormClosingEventArgs e)
+		{
+			this.trackBarTiempoBreak.ValueChanged -= new System.EventHandler(this.trackBarTiempoBreak_Scroll);
+			SystemEvents.SessionSwitch -= SystemEvents_SessionSwitch;
+
 		}
 
 		private void ProcesarVentana(object sender, System.Windows.Forms.MouseEventArgs e)

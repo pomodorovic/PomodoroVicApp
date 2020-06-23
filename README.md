@@ -24,7 +24,7 @@ Pomodoro application
 >Versión 2.0.4:
 - [x] Se resuelven bug en opción: identificar pomodoro ideal, para que muestre horas si pasa de 60 minutos
 - [x] Se corrige espacios demás que guardaba en log.
-
-
-
+>Versión 2.0.5:
+- [x] Detección de bloqueo de máquina, se coloca en pausa automáticamente
+- [x] Si en identificar pomodoro ideal rebasa la 1 hora presenta notificación
 
