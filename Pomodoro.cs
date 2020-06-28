@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.Drawing;
 using System.IO;
+using System.Linq.Expressions;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 using Microsoft.Win32;
@@ -17,6 +18,15 @@ namespace PomodoroVicApp
 		private System.DateTime dtmTiempoActualizado;
 		private int valorInicialPomodoro, valorBreakPomodoro, valorPomodoroEnEjecucion;
 		private string pathLog;
+
+		private Color COLOR_TRABAJO = Color.DarkOrange;//System.Drawing.Color.Navy
+		private Color COLOR_DESCANSO = Color.SteelBlue;
+		private Color COLOR_IDEAL_TRABAJO = Color.SpringGreen;//Color.Lime //Color.MediumVioletRed
+		private Color COLOR_IDEAL_DESCANSO = Color.MediumVioletRed;// Color.DarkTurquoise;
+		private Color COLOR_FIN = Color.Red;//Color.Maroon
+		private Color COLOR_ALERTA = Color.Maroon;// Color.SlateBlue;
+
+		private enum Causa { PorReinicio, PorCompletado, PorFinalizar, PorSalir, PorInicioPausa, PorCancelarPausa }
 
 		private const int WM_NCLBUTTONDOWN = 0xA1;
 		private IntPtr HT_CAPTION = (IntPtr)0x2;
@@ -34,6 +44,15 @@ namespace PomodoroVicApp
 
 		private void Pomodoro_Load(object sender, EventArgs e)
 		{
+			//Codigo para obtener promedios de horas con minutos
+			string[] tiempos = { "17:20", "18:05", "15:45", "19:10", "17:40" };
+			TimeSpan tiempoTotal = new TimeSpan();
+			foreach (var tiempo in tiempos)
+			{
+				tiempoTotal += TimeSpan.Parse(tiempo + ":00");
+			}
+			long averageTicks = (tiempoTotal.Ticks / tiempos.Length);
+			Console.WriteLine("The average is {0}", new TimeSpan(averageTicks));
 
 			// 
 			// trackBarTiempoInicio
@@ -75,17 +94,35 @@ namespace PomodoroVicApp
 			valorInicialPomodoro = Convert.ToInt32(ConfigurationManager.AppSettings["valorInicialPomodoro"]);
 			valorBreakPomodoro = Convert.ToInt32(ConfigurationManager.AppSettings["valorBreakPomodoro"]);
 			this.menuItemActivarLog.Checked = Convert.ToBoolean(ConfigurationManager.AppSettings["LogEnabled"]); ;
-			menuItemMinutosInicio.Text = valorInicialPomodoro + " minutos de inicio";
+			menuItemMinutosInicio.Text = valorInicialPomodoro + " minutos de trabajo";
 			menuItemMinutosBreak.Text = valorBreakPomodoro + " minutos de descanso";
 			trackBarTiempoInicio.Value = valorInicialPomodoro;
 
 			this.Opacity = 1 - Convert.ToDouble(ConfigurationManager.AppSettings["opacidad"]);
+			switch (this.Opacity)
+			{
+				case 0.25:
+					menuItemTransp75_Click(null, null);
+					break;
+				case 0.5:
+					menuItemTransp50_Click(null, null);
+					break;
+				case 0.75:
+					menuItemTransp25_Click(null, null);
+					break;
+				case 1:
+					menuItemTransp0_Click(null, null);
+					break;
+				default:
+					menuItemTransp0_Click(null, null);
+					break;
+			}
 			this.TopMost = Convert.ToBoolean(ConfigurationManager.AppSettings["TopMost"]);
 			menuItemAlwaysOnTop.Checked = this.TopMost;
 			this.menuItemAutoSwitch.Checked = Convert.ToBoolean(ConfigurationManager.AppSettings["AutoSwitch"]);
 			this.menuItemBlink.Checked = Convert.ToBoolean(ConfigurationManager.AppSettings["Blink"]); ;
 			lblTiempo.Text = "00:00";
-			lblTiempo.ForeColor = System.Drawing.Color.Maroon;
+			lblTiempo.ForeColor = COLOR_FIN;
 			lblStatus.Text = "Doble clic para iniciar";
 			valorPomodoroEnEjecucion = valorBreakPomodoro;
 			ntfPomodoro.Icon = this.Icon;
@@ -148,87 +185,198 @@ namespace PomodoroVicApp
 
 		private void menuItemMinutosInicio_Click(object sender, EventArgs e)
 		{
-			EscribitLogPomodoroSiAplica();
+			EscribirLogYStatusPomodoro(Causa.PorReinicio);
+			menuItemPausarContinuarPomodoro.Checked = false;
 			menuItemMinutosInicio.Checked = true;
 			menuItemMinutosBreak.Checked = false;
-			menuItemIdentificarPomodoroIdeal.Checked = false;
-			ProcesarPomodoro(valorInicialPomodoro);
+			menuItemIdentificarPomodoroIdealTrabajo.Checked = false;
+			menuItemIdentificarPomodoroIdealDescanso.Checked = false;
+			valorPomodoroEnEjecucion = valorInicialPomodoro;
+			dtmTiempoActualizado = new DateTime(2020, 1, 1, 0, 0, 0);
+			//dtmTiempoActualizado = dtmTiempoActualizado.AddSeconds(10);//o 3 segundos para desarrollo, para pruebas internas/unitarias
+		   dtmTiempoActualizado = dtmTiempoActualizado.AddMinutes(valorPomodoroEnEjecucion);
+			lblTiempo.Text = dtmTiempoActualizado.ToString("mm:ss");
+			lblStatus.Text = "P " + valorPomodoroEnEjecucion + " iniciado a : " + DateTime.Now.ToString("hh:mm:ss");
+			timerControlTiempo.Start();
 		}
 		private void menuItemMinutosBreak_Click(object sender, EventArgs e)
 		{
-			EscribitLogPomodoroSiAplica();
+			EscribirLogYStatusPomodoro(Causa.PorReinicio);
+			menuItemPausarContinuarPomodoro.Checked = false;
 			menuItemMinutosInicio.Checked = false;
 			menuItemMinutosBreak.Checked = true;
-			menuItemIdentificarPomodoroIdeal.Checked = false;
-			ProcesarPomodoro(valorBreakPomodoro);
+			menuItemIdentificarPomodoroIdealTrabajo.Checked = false;
+			menuItemIdentificarPomodoroIdealDescanso.Checked = false;
+			valorPomodoroEnEjecucion = valorBreakPomodoro;
+			dtmTiempoActualizado = new DateTime(2020, 1, 1, 0, 0, 0);
+			//dtmTiempoActualizado = dtmTiempoActualizado.AddSeconds(5);//o 3 segundos para desarrollo, para pruebas internas/unitarias
+			dtmTiempoActualizado = dtmTiempoActualizado.AddMinutes(valorPomodoroEnEjecucion);
+			lblTiempo.Text = dtmTiempoActualizado.ToString("mm:ss");
+			lblStatus.Text = "P " + valorPomodoroEnEjecucion + " iniciado a : " + DateTime.Now.ToString("hh:mm:ss");
+			timerControlTiempo.Start();
 		}
-		private void menuItemIdentificarPomodoroIdeal_Click(object sender, EventArgs e)
+		private void menuItemIdentificarPomodoroIdealTrabajo_Click(object sender, EventArgs e)
 		{
-			EscribitLogPomodoroSiAplica();
+			EscribirLogYStatusPomodoro(Causa.PorReinicio);
+			menuItemPausarContinuarPomodoro.Checked = false;
 			menuItemMinutosInicio.Checked = false;
 			menuItemMinutosBreak.Checked = false;
-			menuItemIdentificarPomodoroIdeal.Checked = true;
-			lblTiempo.ForeColor = System.Drawing.Color.MediumVioletRed;
-			//dtmTiempoActualizado = new DateTime(2020, 1, 1, 0, 59, 50);//10 segundos antes de 1 hora, para desarrollo -> pruebas unitarias
+			menuItemIdentificarPomodoroIdealTrabajo.Checked = true;
+			menuItemIdentificarPomodoroIdealDescanso.Checked = false;
+			lblTiempo.ForeColor = COLOR_IDEAL_TRABAJO;
+			//dtmTiempoActualizado = new DateTime(2020, 1, 1, 0, 58, 50);//10 segundos antes de 1 hora, para desarrollo -> pruebas unitarias
 			dtmTiempoActualizado = new DateTime(2020, 1, 1, 0, 0, 0);
-			lblStatus.Text = "P ideal iniciado a : " + DateTime.Now.ToString("hh:mm:ss");
-			if (menuItemActivarLog.Checked)
+			lblStatus.Text = "P I Trabajo iniciado a : " + DateTime.Now.ToString("hh:mm:ss");
+			timerControlTiempo.Start();
+		}
+		private void menuItemIdentificarPomodoroIdealDescanso_Click(object sender, EventArgs e)
+		{
+			EscribirLogYStatusPomodoro(Causa.PorReinicio);
+			menuItemPausarContinuarPomodoro.Checked = false;
+			menuItemMinutosInicio.Checked = false;
+			menuItemMinutosBreak.Checked = false;
+			menuItemIdentificarPomodoroIdealTrabajo.Checked = false;
+			menuItemIdentificarPomodoroIdealDescanso.Checked = true;
+			lblTiempo.ForeColor = COLOR_IDEAL_DESCANSO;
+			dtmTiempoActualizado = new DateTime(2020, 1, 1, 0, 58, 55);//10 segundos antes de 1 hora, para desarrollo -> pruebas unitarias
+			//dtmTiempoActualizado = new DateTime(2020, 1, 1, 0, 0, 0);
+			lblStatus.Text = "P I Descanso iniciado a : " + DateTime.Now.ToString("hh:mm:ss");
+			timerControlTiempo.Start();
+		}
+		private void EscribirLogYStatusPomodoro(Causa categoria)
+		{
+			if (!menuItemActivarLog.Checked)//Si no esta activado el Log, salir
+				return;
+			string mensajeLog = string.Empty;
+			string mensajeStatus = string.Empty;
+			//string valorOperacionPomodoro = string.Empty;
+			switch (categoria)
+			{
+				case Causa.PorReinicio:
+					if (lblTiempo.Text == "00:00")
+						return;
+					dtmTiempoAuxiliar = new DateTime(2020, 1, 1, 0, valorPomodoroEnEjecucion, 0);
+					dtmTiempoAuxiliar = dtmTiempoAuxiliar.Subtract(new TimeSpan(0, 0, dtmTiempoActualizado.Minute, dtmTiempoActualizado.Second));
+					if (menuItemMinutosInicio.Checked)
+					{
+						mensajeLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tPomodoro Trabajo " + valorPomodoroEnEjecucion + " reiniciado en \t" + dtmTiempoAuxiliar.ToString("mm:ss");//lblTiempo.Text;
+					}
+					else if (menuItemMinutosBreak.Checked)
+					{
+						mensajeLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tPomodoro Descanso " + valorPomodoroEnEjecucion + " reiniciado en \t" + dtmTiempoAuxiliar.ToString("mm:ss");//lblTiempo.Text;
+					}
+					else if (menuItemIdentificarPomodoroIdealTrabajo.Checked)
+					{
+						mensajeLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tPomodoro Ideal Trabajo reiniciado en \t" + lblTiempo.Text;
+					}
+					else if (menuItemIdentificarPomodoroIdealDescanso.Checked)
+					{
+						mensajeLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tPomodoro Ideal Descanso reiniciado en \t" + lblTiempo.Text;
+					}
+					break;
+				case Causa.PorCompletado://Pomodoro ideal trabajo o ideal descanso no aplica para este caso
+					if (menuItemMinutosInicio.Checked)
+					{
+						mensajeLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tPomodoro Trabajo " + valorPomodoroEnEjecucion + " completado en \t" + valorPomodoroEnEjecucion + ":00";
+					}
+					else if (menuItemMinutosBreak.Checked)
+					{
+						mensajeLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tPomodoro Descanso " + valorPomodoroEnEjecucion + " completado en \t" + +valorPomodoroEnEjecucion + ":00";
+					}
+					mensajeStatus = "P " + valorPomodoroEnEjecucion + " completado en: " + DateTime.Now.ToString("hh:mm:ss");
+					break;
+				case Causa.PorFinalizar:
+				case Causa.PorSalir:
+					dtmTiempoAuxiliar = new DateTime(2020, 1, 1, 0, valorPomodoroEnEjecucion, 0);
+					dtmTiempoAuxiliar = dtmTiempoAuxiliar.Subtract(new TimeSpan(0, 0, dtmTiempoActualizado.Minute, dtmTiempoActualizado.Second));
+					if (menuItemMinutosInicio.Checked)
+					{
+						mensajeLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tPomodoro Trabajo " + valorPomodoroEnEjecucion + " finalizado en \t" + dtmTiempoAuxiliar.ToString("mm:ss");//lblTiempo.Text;
+						mensajeStatus = "P " + valorPomodoroEnEjecucion + " finalizado en :" + DateTime.Now.ToString("hh:mm:ss");
+					}
+					else if (menuItemMinutosBreak.Checked)
+					{
+						mensajeLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tPomodoro Descanso " + valorPomodoroEnEjecucion + " finalizado en \t" + dtmTiempoAuxiliar.ToString("mm:ss");//lblTiempo.Text;
+						mensajeStatus = "P " + valorPomodoroEnEjecucion + " finalizado en :" + DateTime.Now.ToString("hh:mm:ss");
+					}
+					else if (menuItemIdentificarPomodoroIdealTrabajo.Checked)
+					{
+						mensajeLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tPomodoro Ideal Trabajo finalizado en \t" + lblTiempo.Text;
+						mensajeStatus = "P I Trabajo finalizado en : " + DateTime.Now.ToString("hh:mm:ss");
+					}
+					else if (menuItemIdentificarPomodoroIdealDescanso.Checked)
+					{
+						mensajeLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tPomodoro Ideal Descanso finalizado en \t" + lblTiempo.Text;
+						mensajeStatus = "P I Descanso finalizado en : " + DateTime.Now.ToString("hh:mm:ss");
+					}
+					break;
+				case Causa.PorInicioPausa:
+					dtmTiempoAuxiliar = new DateTime(2020, 1, 1, 0, valorPomodoroEnEjecucion, 0);
+					dtmTiempoAuxiliar = dtmTiempoAuxiliar.Subtract(new TimeSpan(0, 0, dtmTiempoActualizado.Minute, dtmTiempoActualizado.Second));
+					if (menuItemMinutosInicio.Checked)
+					{
+						mensajeLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tPomodoro Trabajo " + valorPomodoroEnEjecucion + "  pausado en \t" + dtmTiempoAuxiliar.ToString("mm:ss");//lblTiempo.Text;
+						mensajeStatus = "P " + valorPomodoroEnEjecucion + " pausado en :" + DateTime.Now.ToString("hh:mm:ss");
+					}
+					else if (menuItemMinutosBreak.Checked)
+					{
+						mensajeLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tPomodoro Descanso " + valorPomodoroEnEjecucion + "  pausado en \t" + dtmTiempoAuxiliar.ToString("mm:ss");//lblTiempo.Text;
+						mensajeStatus = "P " + valorPomodoroEnEjecucion + " pausado en :" + DateTime.Now.ToString("hh:mm:ss");
+					}
+					else if (menuItemIdentificarPomodoroIdealTrabajo.Checked)
+					{
+						mensajeLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tPomodoro Ideal Trabajo pausado en \t" + lblTiempo.Text;
+						mensajeStatus = "P I Trabajo pausado en : " + DateTime.Now.ToString("hh:mm:ss");
+					}
+					else if (menuItemIdentificarPomodoroIdealDescanso.Checked)
+					{
+						mensajeLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tPomodoro Ideal Descanso pausado en \t" + lblTiempo.Text;
+						mensajeStatus = "P I Descanso pausado en : " + DateTime.Now.ToString("hh:mm:ss");
+					}
+					dtmTiempoAuxiliar = DateTime.Now;
+					break;
+				case Causa.PorCancelarPausa:
+					var tiempoTranscurrido = (DateTime.Now - dtmTiempoAuxiliar);
+					if (menuItemMinutosInicio.Checked)
+					{
+						mensajeLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tPomodoro Trabajo " + valorPomodoroEnEjecucion + "  retomado en \t" + tiempoTranscurrido.ToString(@"mm\:ss"); //tiempoTranscurrido.ToString(@"hh\:mm\:ss")
+						mensajeStatus = "P " + valorPomodoroEnEjecucion + " retomado en :" + DateTime.Now.ToString("hh:mm:ss");
+					}
+					else if (menuItemMinutosBreak.Checked)
+					{
+						mensajeLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tPomodoro Descanso " + valorPomodoroEnEjecucion + "  retomado en \t" + tiempoTranscurrido.ToString(@"mm\:ss");
+						mensajeStatus = "P " + valorPomodoroEnEjecucion + " retomado en :" + DateTime.Now.ToString("hh:mm:ss");
+					}
+					else if (menuItemIdentificarPomodoroIdealTrabajo.Checked)
+					{
+						mensajeLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tPomodoro Ideal Trabajo retomado en \t" + tiempoTranscurrido.ToString(@"mm\:ss");
+						mensajeStatus = "P I Trabajo retomado en : " + DateTime.Now.ToString("hh:mm:ss");
+					}
+					else if (menuItemIdentificarPomodoroIdealDescanso.Checked)
+					{
+						mensajeLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tPomodoro Ideal Descanso retomado en \t" + tiempoTranscurrido.ToString(@"mm\:ss");
+						mensajeStatus = "P I Descanso retomado en : " + DateTime.Now.ToString("hh:mm:ss");
+					}
+					break;
+				default:
+					break;
+			}
+			if(mensajeLog != String.Empty)
 			{
 				using (StreamWriter escribirArchivo = new StreamWriter(pathLog, true))
 				{
-					escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP ideal iniciado");
+					escribirArchivo.WriteLine(mensajeLog);
 				}
 			}
-			timerControlTiempo.Start();
-		}
-		private void EscribitLogPomodoroSiAplica()
-		{
-			if (menuItemActivarLog.Checked && lblTiempo.Text != "00:00")
+			if(mensajeStatus != String.Empty)
 			{
-				if (menuItemMinutosInicio.Checked)
-				{
-					using (StreamWriter escribirArchivo = new StreamWriter(pathLog, true))
-					{
-						escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroEnEjecucion + " reiniciado faltando " + lblTiempo.Text);
-					}
-				}
-				else if (menuItemMinutosBreak.Checked)
-				{
-					using (StreamWriter escribirArchivo = new StreamWriter(pathLog, true))
-					{
-						escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroEnEjecucion + " reiniciado faltando " + lblTiempo.Text);
-					}
-				}
-				else if (menuItemIdentificarPomodoroIdeal.Checked)
-				{
-					using (StreamWriter escribirArchivo = new StreamWriter(pathLog, true))
-					{
-						escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP ideal finalizado en " + lblTiempo.Text);
-					}
-				}
+				lblStatus.Text = mensajeStatus;
 			}
-		}
-		private void ProcesarPomodoro(int valorPomodoroAEjecutar)
-		{
-			valorPomodoroEnEjecucion = valorPomodoroAEjecutar;
-			dtmTiempoAuxiliar = new DateTime(2020, 1, 1, 0, 0, 0);
-			dtmTiempoActualizado = new DateTime(2020, 1, 1, 0, 0, 0);
-			//dtmTiempoActualizado = dtmTiempoActualizado.AddSeconds(10);//o 3 segundos para desarrollo, para pruebas internas/unitarias
-			dtmTiempoActualizado = dtmTiempoActualizado.AddMinutes(valorPomodoroAEjecutar);
-			lblStatus.Text = "P " + valorPomodoroEnEjecucion + " iniciado a : " + DateTime.Now.ToString("hh:mm:ss");
-			if (menuItemActivarLog.Checked)
-			{
-				using (StreamWriter escribirArchivo = new StreamWriter(pathLog, true))
-				{
-					escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroEnEjecucion + " iniciado");
-				}
-			}
-			timerControlTiempo.Start();
 		}
 
 		private void timerControlTiempo_Tick(object sender, EventArgs e)
 		{
-			if(menuItemIdentificarPomodoroIdeal.Checked )
+			if(menuItemIdentificarPomodoroIdealTrabajo.Checked || menuItemIdentificarPomodoroIdealDescanso.Checked)
 			{
 				dtmTiempoActualizado = dtmTiempoActualizado.Add(new TimeSpan(0, 0, 0, 1));
 				if(dtmTiempoActualizado.Hour>0)
@@ -243,35 +391,50 @@ namespace PomodoroVicApp
 				{
 					if (menuItemBlink.Checked)
 					{
-						if (lblTiempo.ForeColor == System.Drawing.Color.MediumVioletRed)
+						if (menuItemIdentificarPomodoroIdealTrabajo.Checked)
 						{
-							lblTiempo.ForeColor = System.Drawing.Color.Red;
+							if (lblTiempo.ForeColor == COLOR_IDEAL_TRABAJO)
+							{
+								lblTiempo.ForeColor = COLOR_ALERTA;
+							}
+							else
+							{
+								lblTiempo.ForeColor = COLOR_IDEAL_TRABAJO;
+							}
 						}
-						else
+						else//Pomodoro Ideal Descanso
 						{
-							lblTiempo.ForeColor = System.Drawing.Color.MediumVioletRed;
+							if (lblTiempo.ForeColor == COLOR_IDEAL_DESCANSO)
+							{
+								lblTiempo.ForeColor = COLOR_ALERTA;
+							}
+							else
+							{
+								lblTiempo.ForeColor = COLOR_IDEAL_DESCANSO;
+							}
 						}
 					}
 					if(dtmTiempoActualizado.Second==59)
 					{
-						MostrarMensajeBalon(SystemIcons.Exclamation, ToolTipIcon.Warning, "Información", "Pomodoro tomá ya más de una hora", 3000);
+						string pomodoroIdeal;
+						if (menuItemIdentificarPomodoroIdealTrabajo.Checked)
+						{
+							pomodoroIdeal = "trabajo";
+						}
+						else
+						{
+							pomodoroIdeal = "descanso";
+						}
+						MostrarMensajeBalon(SystemIcons.Exclamation, ToolTipIcon.Warning, "Información", "Pomodoro " + pomodoroIdeal + " tomá ya más de una hora", 3000);
 					}
 				}
-
 				return;
 			}
-			if (dtmTiempoActualizado <= dtmTiempoAuxiliar)
+			if (lblTiempo.Text == "00:00")
 			{
 				timerControlTiempo.Stop();
-				lblTiempo.ForeColor = System.Drawing.Color.Maroon;
-				lblStatus.Text = "P " + valorPomodoroEnEjecucion + " finalizado en: " + DateTime.Now.ToString("hh:mm:ss");
-				if (menuItemActivarLog.Checked)
-				{
-					using (StreamWriter escribirArchivo = new StreamWriter(pathLog, true))
-					{
-						escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroEnEjecucion + " finalizado");
-					}
-				}
+				lblTiempo.ForeColor = COLOR_FIN;
+				EscribirLogYStatusPomodoro(Causa.PorCompletado);
 				MostrarMensajeBalon(SystemIcons.Exclamation, ToolTipIcon.Info, "Información", "Fin del Pomodoro " + valorPomodoroEnEjecucion, 3000);
 				if (menuItemAutoSwitch.Checked)
 				{
@@ -295,24 +458,24 @@ namespace PomodoroVicApp
 				{
 					if (valorPomodoroEnEjecucion == valorBreakPomodoro)
 					{
-						if (lblTiempo.ForeColor == System.Drawing.Color.SteelBlue)
+						if (lblTiempo.ForeColor == COLOR_DESCANSO)
 						{
-							lblTiempo.ForeColor = System.Drawing.Color.Maroon;
+							lblTiempo.ForeColor = COLOR_ALERTA;
 						}
 						else
 						{
-							lblTiempo.ForeColor = System.Drawing.Color.SteelBlue;
+							lblTiempo.ForeColor = COLOR_DESCANSO;
 						}
 					}
 					else
 					{
-						if (lblTiempo.ForeColor == System.Drawing.Color.Navy)
+						if (lblTiempo.ForeColor == COLOR_TRABAJO)
 						{
-							lblTiempo.ForeColor = System.Drawing.Color.Maroon;
+							lblTiempo.ForeColor = COLOR_ALERTA;
 						}
 						else
 						{
-							lblTiempo.ForeColor = System.Drawing.Color.Navy;
+							lblTiempo.ForeColor = COLOR_TRABAJO;
 						}
 					}
 				}
@@ -320,11 +483,11 @@ namespace PomodoroVicApp
 				{
 					if (valorPomodoroEnEjecucion == valorBreakPomodoro)
 					{
-						lblTiempo.ForeColor = System.Drawing.Color.SteelBlue;
+						lblTiempo.ForeColor = COLOR_DESCANSO;
 					}
 					else
 					{
-						lblTiempo.ForeColor = System.Drawing.Color.Navy;
+						lblTiempo.ForeColor = COLOR_TRABAJO;
 					}
 				}
 			}
@@ -342,13 +505,15 @@ namespace PomodoroVicApp
 		private void menuItemAcercaDe_Click(object sender, EventArgs e)
 		{
 			MessageBox.Show("PomodoroVic Timer" +
-				Environment.NewLine + "Herramienta de apoyo para alertad acerca de tu productividad." +
+				Environment.NewLine + "Herramienta de apoyo para medir tu productividad." +
 				Environment.NewLine + "Autor: Victor Velepucha" +
 				Environment.NewLine +
 				Environment.NewLine + "Doble clic para alternar entre pomodoros." +
-				Environment.NewLine + "Tiempo en color celeste para Pomodoro Trabajo." +
-				Environment.NewLine + "Tiempo en color azul para Pomodoro descanso." +
-				Environment.NewLine + "Tiempo en color rojo cuando ha finalizado.",
+				Environment.NewLine + "Tiempo en " + COLOR_TRABAJO + " para Pomodoro Trabajo." +
+				Environment.NewLine + "Tiempo en " + COLOR_DESCANSO + " para Pomodoro Descanso." +
+				Environment.NewLine + "Tiempo en " + COLOR_IDEAL_TRABAJO + " para Pomodorlo Ideal Trabajo." + 
+				Environment.NewLine + "Tiempo en " + COLOR_IDEAL_DESCANSO + " para Pomodorlo Ideal Descanso." + 
+				Environment.NewLine + "Tiempo en " + COLOR_FIN + " cuando ha finalizado el Pomodoro.",
 				"PomodoroVic!!!");
 		}
 
@@ -357,68 +522,39 @@ namespace PomodoroVicApp
 			DialogResult result = MessageBox.Show("Seguro desea salir?", "Confirmación", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
 			if (result == DialogResult.Yes)
 			{
-				string valorPomodoroActual = (menuItemIdentificarPomodoroIdeal.Checked) ? "ideal" : valorPomodoroEnEjecucion.ToString();
-				if (menuItemActivarLog.Checked)
-				{
-					using (StreamWriter escribirArchivo = new StreamWriter(pathLog, true))
-					{
-						escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroActual + " finalizado en " + lblTiempo.Text);
-					}
-				}
+				EscribirLogYStatusPomodoro(Causa.PorSalir);
 				Application.Exit();
 			}
 		}
 
-		private void menuItemCancelar_Click(object sender, EventArgs e)
+		private void menuItemFinalizar_Click(object sender, EventArgs e)
 		{
 			if (lblTiempo.Text == "00:00")
 				return;
 			timerControlTiempo.Stop();
-			string valorPomodoroActual = (menuItemIdentificarPomodoroIdeal.Checked) ? "ideal" : valorPomodoroEnEjecucion.ToString();
-			if (menuItemActivarLog.Checked)
-			{
-				using (StreamWriter escribirArchivo = new StreamWriter(pathLog, true))
-				{
-					escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroActual + " finalizado en " + lblTiempo.Text);
-				}
-			}
+			EscribirLogYStatusPomodoro(Causa.PorFinalizar);
 			lblTiempo.Text = "00:00";
-			lblTiempo.ForeColor = System.Drawing.Color.Maroon;
-			lblStatus.Text = "P " + valorPomodoroActual + " finalizado en :" + DateTime.Now.ToString("hh:mm:ss");
+			lblTiempo.ForeColor = COLOR_FIN;
 		}
 
 		private void menuItemPausarContinuarPomodoro_Click(object sender, EventArgs e)
 		{
 			if (lblTiempo.Text == "00:00")
 				return;
-			string valorPomodoroActual = (menuItemIdentificarPomodoroIdeal.Checked) ? "ideal" : valorPomodoroEnEjecucion.ToString();
 			if (menuItemPausarContinuarPomodoro.Checked)
 			{
-				menuItemPausarContinuarPomodoro.Checked = false;
-				if (menuItemActivarLog.Checked)
-				{
-					using (StreamWriter escribirArchivo = new StreamWriter(pathLog, true))
-					{
-						escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroActual + " retomado en " + lblTiempo.Text);
-					}
-				}
-				lblStatus.Text = "P " + valorPomodoroActual + " retomado en :" + DateTime.Now.ToString("hh:mm:ss");
 				timerControlTiempo.Start();
+				menuItemPausarContinuarPomodoro.Checked = false;
+				EscribirLogYStatusPomodoro(Causa.PorCancelarPausa);
 			}
 			else
 			{
-				menuItemPausarContinuarPomodoro.Checked = true;
-				lblStatus.Text = "P " + valorPomodoroActual + " pausado en :" + DateTime.Now.ToString("hh:mm:ss");
 				timerControlTiempo.Stop();
-				if (menuItemActivarLog.Checked)
-				{
-					using (StreamWriter escribirArchivo = new StreamWriter(pathLog, true))
-					{
-						escribirArchivo.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\tP " + valorPomodoroActual + " pausado en " + lblTiempo.Text);
-					}
-				}
+				menuItemPausarContinuarPomodoro.Checked = true;
+				EscribirLogYStatusPomodoro(Causa.PorInicioPausa);
 			}
 		}
+
 		public void SystemEvents_SessionSwitch(object sender, SessionSwitchEventArgs e)
 		{
 			if (e.Reason == SessionSwitchReason.SessionLock)
@@ -443,7 +579,7 @@ namespace PomodoroVicApp
 			}
 			else if (e.KeyCode == Keys.Escape)
 			{
-				menuItemCancelar_Click(null,null);
+				menuItemFinalizar_Click(null,null);
 				// prevent child controls from handling this event as well
 				e.SuppressKeyPress = true;
 			}
@@ -513,7 +649,7 @@ namespace PomodoroVicApp
 		private void trackBarTiempoInicio_Scroll(object sender, EventArgs e)
 		{
 			valorInicialPomodoro = Convert.ToInt32(trackBarTiempoInicio.Value);
-			menuItemMinutosInicio.Text = valorInicialPomodoro + " minutos de inicio";
+			menuItemMinutosInicio.Text = valorInicialPomodoro + " minutos de trabajo";
 		}
 		private void trackBarTiempoBreak_Scroll(object sender, EventArgs e)
 		{
