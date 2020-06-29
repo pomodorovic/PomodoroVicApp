@@ -238,8 +238,8 @@ namespace PomodoroVicApp
 			menuItemIdentificarPomodoroIdealTrabajo.Checked = false;
 			menuItemIdentificarPomodoroIdealDescanso.Checked = true;
 			lblTiempo.ForeColor = COLOR_IDEAL_DESCANSO;
-			dtmTiempoActualizado = new DateTime(2020, 1, 1, 0, 58, 55);//10 segundos antes de 1 hora, para desarrollo -> pruebas unitarias
-			//dtmTiempoActualizado = new DateTime(2020, 1, 1, 0, 0, 0);
+			//dtmTiempoActualizado = new DateTime(2020, 1, 1, 0, 58, 55);//10 segundos antes de 1 hora, para desarrollo -> pruebas unitarias
+			dtmTiempoActualizado = new DateTime(2020, 1, 1, 0, 0, 0);
 			lblStatus.Text = "P I Descanso iniciado a : " + DateTime.Now.ToString("hh:mm:ss");
 			timerControlTiempo.Start();
 		}

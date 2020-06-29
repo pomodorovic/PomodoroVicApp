@@ -77,5 +77,5 @@ Ronda 5: (Casos pausa + retomar)
 - [x] Se añade opción Identificar Pomodoro Ideal Descanso, y ahora se diferencia entre Pomodoro Ideal Trabajo y Pomodoro Ideal Descanso
 - [x] Se corrige error, al iniciar no colocaba en checked la opacidad seleccionada, acorde a lo leido del archivo de configuración App.config
 - [x] Se mejora la forma de guardar en el log para más adelante generar estadísticas
-
-
+>Versión 2.6.1.0:
+- [x] Se corrige error, en contador Identificar Pomodoro descanso
